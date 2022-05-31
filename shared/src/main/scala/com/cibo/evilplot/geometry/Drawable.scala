@@ -71,7 +71,7 @@ object InteractionEvent {
   }
 }
 
-case class EmptyEvent() extends InteractionEvent{
+case class EmptyEvent() extends InteractionEvent {
   override val e: IEInfo => Unit = _ => ()
 }
 case class OnClick(e: IEInfo => Unit) extends InteractionEvent
@@ -164,11 +164,13 @@ object Polygon {
   }
 
   def apply(boundary: Seq[Point2d]): Drawable = {
-    val minX = boundary.map(_.x).min
-    val minY = boundary.map(_.y).min
-    Translate(new Polygon(boundary.map { x =>
-      Point(x.x - minX, x.y - minY)
-    }), minX, minY)
+    if (boundary.nonEmpty) {
+      val minX = boundary.map(_.x).min
+      val minY = boundary.map(_.y).min
+      Translate(new Polygon(boundary.map { x =>
+        Point(x.x - minX, x.y - minY)
+      }), minX, minY)
+    } else EmptyDrawable()
   }
 }
 
@@ -257,7 +259,8 @@ final case class Affine(r: Drawable, affine: AffineTransform) extends Drawable {
       affine(0, 0),
       affine(r.extent.width, 0),
       affine(r.extent.width, r.extent.height),
-      affine(0, r.extent.height))
+      affine(0, r.extent.height)
+    )
     val (xs, ys) = pts.unzip
     val width = xs.max - xs.min
     val height = ys.max - ys.min
@@ -410,7 +413,8 @@ final case class Text(
 ) extends Drawable {
   require(
     size >= 0.5,
-    s"Cannot use $size, canvas will not draw text initially sized < 0.5px even when scaling")
+    s"Cannot use $size, canvas will not draw text initially sized < 0.5px even when scaling"
+  )
 
   lazy val extent: Extent = extentOpt.getOrElse(TextMetrics.measure(this))
   def draw(context: RenderContext): Unit = context.draw(this)
